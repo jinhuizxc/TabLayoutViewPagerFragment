@@ -7,7 +7,7 @@
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="18dp"
         android:gravity="center"
+        android:textSize="18sp"
         android:text="服务管家" />
 </RelativeLayout>

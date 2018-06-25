@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.jh.tablayoutviewpagerfragment.fragment.ButerFragment;
 import com.example.jh.tablayoutviewpagerfragment.fragment.GirlFragment;
@@ -21,6 +22,9 @@ import java.util.List;
 
 /**
  * https://mp.weixin.qq.com/s/eKPwQLJVUsZn6HNt7eivMQ
+ *
+ * 多个fragment页面切换如何设置数据？ 这篇文章给予了答案：
+ * https://blog.csdn.net/Lovebomb/article/details/52091447
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     List<Fragment> mfragment;
     List<String> mtitle;
     FloatingActionButton fab_setting;
+    private int currentPageIndex = 0; // 当前page索引
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +55,8 @@ public class MainActivity extends AppCompatActivity {
         mviewpager.setOffscreenPageLimit(mfragment.size());
         //       设置适配器
         mviewpager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
 
-//
+            @Override
             public Fragment getItem(int position) {
                 return mfragment.get(position);
             }
@@ -62,13 +66,31 @@ public class MainActivity extends AppCompatActivity {
                 return mfragment.size();
             }
 
+            // 为了能实现ViewPager保存Fragment的状态，方法
+            @Override
+            public Object instantiateItem(ViewGroup container, int position) {
+                Fragment fragment = (Fragment) super.instantiateItem(container, position);
+                getSupportFragmentManager().beginTransaction().show(fragment).commit();
+                return fragment;
+            }
+
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+//                super.destroyItem(container, position, object);
+                Fragment fragment = mfragment.get(position);
+                getSupportFragmentManager().beginTransaction().hide(fragment).commit();
+            }
+
             @Override
             public CharSequence getPageTitle(int position) {
                 return mtitle.get(position);
             }
         });
+
+
         //将TabLayout与ViewPager进行绑定
         mtablayout.setupWithViewPager(mviewpager);
+
 
         // 初始化悬浮框
         fab_setting = (FloatingActionButton) findViewById(R.id.fab_setting);
@@ -86,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
             }
 
             @Override
@@ -96,6 +119,16 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     fab_setting.setVisibility(View.VISIBLE);
                 }
+
+                mfragment.get(currentPageIndex).onPause(); // 调用切换前Fargment的onPause()
+                // fragments.get(currentPageIndex).onStop(); // 调用切换前Fargment的onStop()
+                if (mfragment.get(position).isAdded()) {
+                    // fragments.get(i).onStart(); // 调用切换后Fargment的onStart()
+                    mfragment.get(position).onResume(); // 调用切换后Fargment的onResume()
+                }
+                currentPageIndex = position;
+
+
             }
 
             @Override
@@ -114,8 +147,8 @@ public class MainActivity extends AppCompatActivity {
         mtitle.add("个人中心");
         mfragment = new ArrayList<>();
         mfragment.add(new ButerFragment());
-        mfragment.add(new GirlFragment());
         mfragment.add(new WeChatFragment());
+        mfragment.add(new GirlFragment());
         mfragment.add(new UserFragment());
     }
 }

@@ -4,9 +4,10 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/button2"
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:textSize="18sp"
         android:text="美女社区" />
 </LinearLayout>
